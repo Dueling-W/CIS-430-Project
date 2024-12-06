@@ -8,6 +8,7 @@ from keras.models import Sequential
 from keras.layers import Embedding
 from keras.layers import LSTM
 from keras.layers import Dense
+from keras.layers import InputLayer
 from keras.optimizers import Adam
 from sklearn.preprocessing import OrdinalEncoder
 
@@ -18,12 +19,15 @@ def createModel(unique_words, max_len):
     output_dim = 50
     model = Sequential()
     print(f'Creating embed layer using {unique_words} words, {max_len} length, output dim of {output_dim}')
-    embed = Embedding(input_dim = unique_words, output_dim=output_dim, input_length=max_len)
+
+    input = InputLayer(input_shape = (max_len,))
+    model.add(input)
+    embed = Embedding(input_dim = unique_words, output_dim=output_dim, trainable=True)
     model.add(embed)
     model.add(LSTM(100))
     model.add(Dense(1, activation='tanh'))
 
-    model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics='accuracy')
+    model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
     return model
 
@@ -34,11 +38,6 @@ if __name__ == "__main__":
     df = pd.read_csv(dataset)
     count = func.returnCount(df)
     data_train, data_test, labels_train, labels_test, length = func.mlPreprocessing(df)
-
-
-    encode = OrdinalEncoder()
-    encoded_train_labels = encode.transform(labels_train)
-    print(encoded_train_labels)
 
     model = createModel(count, length)
     print(model.summary())

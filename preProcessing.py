@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib
 import tensorflow as tf
 from tensorflow import keras
-from keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.text import Tokenizer
 from keras.utils import pad_sequences
 import spacy
 from num2words import num2words
@@ -14,6 +14,7 @@ import re
 from collections import Counter
 
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 
 
 
@@ -105,7 +106,12 @@ def mlPreprocessing(df):
     train_padded = pad_sequences(train_seq, maxlen=length, padding='post', truncating='post', value = 0.0)
     test_padded = pad_sequences(test_seq, maxlen=length, padding='post', truncating='post', value = 0.0)
 
-    return train_padded, test_padded, labels_train, labels_test, length
+    le = LabelEncoder()
+    le.fit(labels_train)
+    labels_train_enc = le.transform(labels_train)
+    labels_test_enc = le.transform(labels_test)
+
+    return train_padded, test_padded, labels_train_enc, labels_test_enc, length
 
 
 
