@@ -6,6 +6,8 @@ import numpy as np
 import matplotlib
 import tensorflow as tf
 from tensorflow import keras
+from keras.preprocessing.text import Tokenizer
+from keras.utils import pad_sequences
 import spacy
 from num2words import num2words
 import re
@@ -65,7 +67,7 @@ def classPercentages(df):
     print(f'Class Counts: {class_counts}\n Class Percentages: {class_percentages}')
 
 
-def splitDataset(df):
+def returnCount(df):
 
     data = df['data']
     count = Counter()
@@ -75,7 +77,36 @@ def splitDataset(df):
         for word in split_text:
             count[word] += 1
     
-    return count
+    return int(len(count))
+
+def mlPreprocessing(df):
+
+    data = df.iloc[:, 0]  
+    labels = df.iloc[:, -1]  
+
+    data_train, data_test, labels_train, labels_test = train_test_split(data.to_numpy(), labels.to_numpy(), train_size=.80, random_state=42)
+
+    # https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/text/Tokenizer
+    count = returnCount(df)
+    token = Tokenizer(num_words=count)
+    token.fit_on_texts(data_train)
+
+    # https://stackoverflow.com/questions/42943291/what-does-keras-io-preprocessing-sequence-pad-sequences-do
+
+    train_seq = token.texts_to_sequences(data_train)
+    test_seq = token.texts_to_sequences(data_test)
+
+    sequence_lengths = [len(seq) for seq in train_seq]
+    #print("90th percentile length:", np.percentile(sequence_lengths, 95))
+    #print("Max length:", max(sequence_lengths))
+
+    length = 350
+
+    train_padded = pad_sequences(train_seq, maxlen=length, padding='post', truncating='post', value = 0.0)
+    test_padded = pad_sequences(test_seq, maxlen=length, padding='post', truncating='post', value = 0.0)
+
+    return train_padded, test_padded, labels_train, labels_test, length
+
 
 
 if __name__ == "__main__":

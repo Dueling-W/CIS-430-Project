@@ -1,13 +1,53 @@
 # Import functions
 
-import functions as func
+import preProcessing as func
 import pandas as pd
+import tensorflow as tf
+from tensorflow import keras
+from keras.models import Sequential
+from keras.layers import Embedding
+from keras.layers import LSTM
+from keras.layers import Dense
+from keras.optimizers import Adam
+from sklearn.preprocessing import OrdinalEncoder
+
+
+def createModel(unique_words, max_len):
+
+    opt = Adam(learning_rate=0.003)
+    output_dim = 50
+    model = Sequential()
+    print(f'Creating embed layer using {unique_words} words, {max_len} length, output dim of {output_dim}')
+    embed = Embedding(input_dim = unique_words, output_dim=output_dim, input_length=max_len)
+    model.add(embed)
+    model.add(LSTM(100))
+    model.add(Dense(1, activation='tanh'))
+
+    model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics='accuracy')
+
+    return model
+
+    
 
 if __name__ == "__main__":
     dataset = 'bbc_data_pre_processed.csv'
     df = pd.read_csv(dataset)
-    count = func.splitDataset(df)
-    print(len(count))
+    count = func.returnCount(df)
+    data_train, data_test, labels_train, labels_test, length = func.mlPreprocessing(df)
+
+
+    encode = OrdinalEncoder()
+    encoded_train_labels = encode.transform(labels_train)
+    print(encoded_train_labels)
+
+    model = createModel(count, length)
+    print(model.summary())
+
+    #model.fit(data_train, labels_train, epochs=20, validation_split=0.2, verbose=2)
+
+
+
+
 
 
 
