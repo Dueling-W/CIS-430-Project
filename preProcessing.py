@@ -70,6 +70,7 @@ def classPercentages(df):
 
 def returnCount(df):
 
+    # Counts number of unique words in the dataframe
     data = df['data']
     count = Counter()
 
@@ -82,30 +83,37 @@ def returnCount(df):
 
 def mlPreprocessing(df):
 
+    # Splits dataset into 80% training 20% testing
     data = df.iloc[:, 0]  
     labels = df.iloc[:, -1]  
 
     data_train, data_test, labels_train, labels_test = train_test_split(data.to_numpy(), labels.to_numpy(), train_size=.80, random_state=42)
 
     # https://www.tensorflow.org/api_docs/python/tf/keras/preprocessing/text/Tokenizer
+    # Converts words into numerical values (indexes)
     count = returnCount(df)
     token = Tokenizer(num_words=count)
     token.fit_on_texts(data_train)
 
     # https://stackoverflow.com/questions/42943291/what-does-keras-io-preprocessing-sequence-pad-sequences-do
-
+    # Creats sequences instead of just plain lists
     train_seq = token.texts_to_sequences(data_train)
     test_seq = token.texts_to_sequences(data_test)
 
+
     sequence_lengths = [len(seq) for seq in train_seq]
-    #print("90th percentile length:", np.percentile(sequence_lengths, 95))
+    #print("50th percentile length:", np.percentile(sequence_lengths, 50))
     #print("Max length:", max(sequence_lengths))
 
+    # Adjust length parameter
     length = 350
 
+    # Pad/truncate sequences so they are the same length
+    # Could change 'post' to 'pre' to see results
     train_padded = pad_sequences(train_seq, maxlen=length, padding='post', truncating='post', value = 0.0)
     test_padded = pad_sequences(test_seq, maxlen=length, padding='post', truncating='post', value = 0.0)
 
+    # Convert text labels into numerical values (0-4)
     le = LabelEncoder()
     le.fit(labels_train)
     labels_train_enc = le.transform(labels_train)
