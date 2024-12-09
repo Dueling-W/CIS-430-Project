@@ -17,6 +17,8 @@ from keras.callbacks import EarlyStopping
 from keras.optimizers import Adam
 from sklearn.preprocessing import OrdinalEncoder
 
+import matplotlib.pyplot as plt
+
 
 def createModel(unique_words, max_len):
 
@@ -54,6 +56,27 @@ def createModel(unique_words, max_len):
 
     return model
 
+
+def generateGraph(history):
+
+    fig = plt.figure()
+    ax1 = fig.add_subplot(2,1,1)
+    ax1.plot(history.history['loss'])
+    ax1.plot(history.history['val_loss'])
+    ax1.set_xlabel('Epoch')
+    ax1.set_ylabel('Loss')
+    ax1.legend(['train', 'validation'], loc='upper left')
+
+
+    ax2 = fig.add_subplot(2,1,2)
+    ax2.plot(history.history['accuracy'])
+    ax2.plot(history.history['val_accuracy'])
+    ax2.set_xlabel('Epoch')
+    ax2.set_ylabel('Accuracy')
+    ax2.legend(['train', 'validation'], loc='upper left')
+
+    plt.show()
+
     
 
 if __name__ == "__main__":
@@ -69,10 +92,17 @@ if __name__ == "__main__":
     print(model.summary())
 
     # Stops model at perfect point, can change the patience value
-    early_stop = EarlyStopping(monitor="val_accuracy", patience=10)
+    early_stop = EarlyStopping(monitor="val_accuracy", patience=14)
 
     # Train the model, epochs can be changed but mostly uncessary with early stopping
-    model.fit(data_train, labels_train, epochs=100, validation_split=0.2, verbose=2, callbacks=[early_stop])
+    history = model.fit(data_train, labels_train, epochs=100, validation_split=0.2, verbose=2, callbacks=[early_stop])
+
+    results = model.evaluate(data_test, labels_test)
+    print(f'\nEvaluated Loss: {results[0]}; Evaluated Accuracy: {results[1]}')
+
+    generateGraph(history)
+
+
 
     
 
