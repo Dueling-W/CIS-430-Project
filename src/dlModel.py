@@ -51,7 +51,7 @@ def createModel(unique_words, max_len, tag):
 
     if(tag=='bbc'):
         # Final layer, shouldn't be tweaked
-        model.add(Dense(5, activation=activation))
+        model.add(Dense(6, activation=activation))
     else:
         model.add(Dense(1, activation=activation))
 
@@ -85,7 +85,7 @@ def generateGraph(history):
     ax2.set_ylabel('Accuracy')
     ax2.legend(['train', 'validation'], loc='upper left')
 
-    fig.suptitle('Bidirectional LSTM Model Training')
+    fig.suptitle('Bidirectional GRU Model Training')
     plt.show()
 
     
@@ -93,7 +93,8 @@ def generateGraph(history):
 if __name__ == "__main__":
 
     # Process dataset
-    dataset = 'data/spam_data_pre_processed.csv'
+    tag = 'bbc' # bbc or spam
+    dataset = f'data/{tag}_data_pre_processed.csv'
     df = pd.read_csv(dataset)
 
     # Return # of unique words, create test/train datasets
@@ -101,7 +102,6 @@ if __name__ == "__main__":
     data_train, data_test, labels_train, labels_test, length = func.mlPreprocessing(df, 'data')
 
     # Creat model, print out summary of the overall layers
-    tag = 'spam' # spam or bbc
     model = createModel(count, length, tag)
     print(model.summary())
 
