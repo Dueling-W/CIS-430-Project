@@ -44,7 +44,7 @@ def createModel(unique_words, max_len, tag):
     model.add(embed)
 
     # LSTM layer (main logic), can tweak number of units
-    model.add(LSTM(units=40, activation=activation))
+    model.add(SimpleRNN(units=40, activation=activation))
 
     # Dropout layer (removes some units), can also be tweaked
     model.add(Dropout(0.1))
@@ -85,7 +85,7 @@ def generateGraph(history):
     ax2.set_ylabel('Accuracy')
     ax2.legend(['train', 'validation'], loc='upper left')
 
-    fig.suptitle('LSTM Model Training - DS2')
+    fig.suptitle('Simple RNN Model Training - DS2')
     plt.show()
 
     
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     print(model.summary())
 
     # Stops model at perfect point, can change the patience value
-    early_stop = EarlyStopping(monitor="val_accuracy", patience=20)
+    early_stop = EarlyStopping(monitor="val_accuracy", patience=12)
     #lr_monitor = ReduceLROnPlateau(monitor='val_loss', factor=.7, patience=3)
 
     # Train the model, epochs can be changed but mostly uncessary with early stopping
